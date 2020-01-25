@@ -1,0 +1,185 @@
+
+
+sqoop list-databases \
+--connect "jdbc:mysql://quickstart.cloudera:3306" \
+--username root \
+--password cloudera
+
+ 
+ sqoop list-tables \
+ --connect "jdbc:mysql://quickstart.cloudera:3306"/retail_db \
+ --username root \
+ --password cloudera
+ 
+   
+  sqoop eval \
+  --connect "jdbc:mysql://quickstart.cloudera:3306/retail_db" \
+  --username root \
+  --password cloudera \
+  --query "select count(200) from categories"
+  
+  *imported data from mysql datbase to hdfs in default location(user/cloudera)
+sqoop import \
+--connect jdbc:mysql://quickstart.cloudera:3306/retail_db \
+--username root \
+--password cloudera \
+--table categories \
+--delete-target-dir
+
+sqoop import \
+--connect jdbc:mysql://quickstart.cloudera:3306/retail_db \
+--username root \
+--password cloudera \
+--table categories \
+--target-dir /user/cloudera/my_sqoop \
+--delete-target-dir
+
+sqoop import \
+  --connect jdbc:mysql://quickstart.cloudera:3306/retail_db \
+  --username root \
+  --password cloudera \
+  --table categories \
+  --warehouse-dir /user/training/sqoop_import \
+  --delete-target-dir
+   
+  sqoop import \
+  --connect jdbc:mysql://quickstart.cloudera:3306/retail_db \
+  --username root \
+  --password cloudera \
+  --table categories \
+  --warehouse-dir /user/training/sqoop_import/retail_db \
+  --boundary-query "SELECT 1,172198" \
+  --delete-target-dir
+  
+ 
+  --delete-target-dir
+    sqoop import \
+  --connect jdbc:mysql://quickstart.cloudera:3306/retail_db \
+  --username root \
+  --password cloudera \
+  --table order_items \
+  --warehouse-dir /user/training/sqoop_import/retail_db \
+  --boundary-query "SELECT min(order_item_order_id),max(order_item_order_id)
+                    FROM order_items 
+                    WHERE order_item_order_id >=100" \
+  --delete-target-dir
+  
+  ##to display the num of part files
+  hadoop fs -ls /user/training/sqoop_import/order_items
+  hadoop fs -ls /user/training/sqoop_import/retail_db/customers
+  
+  ##to dispay the part files data 
+  hadoop fs -cat /user/training/sqoop_import/order_items
+  
+  
+  sqoop import \
+  --connect jdbc:mysql://quickstart.cloudera:3306/retail_db \
+  --username root \
+  --password cloudera \
+  --table orders \
+  --warehouse-dir /user/training/sqoop_import/retail_db \
+  --delete-target-dir \
+  --where "order_status IN ('COMPLETE','CLOSED') AND order_date LIKE '2013-08%'"
+  
+  
+  HIVE###########
+  
+  sqoop eval \
+  --connect jdbc:mysql://ms.itversity.com:3306/retail_db \
+  --username retail_user \
+  --password itversity \
+  -e "DESCRIBE customers"
+  
+  sqoop import \
+  --connect jdbc:mysql://ms.itversity.com:3306/retail_db \
+  --username retail_user \
+  --password itversity \
+  --table customers \
+  --columns customer_id,customer_fname,customer_lname,\
+customer_street,customer_city,customer_state,customer_zipcode \
+  --warehouse-dir /user/training/sqoop_import/retail_db \
+  --delete-target-dir
+  
+  
+  
+  sqoop import \
+  --connect jdbc:mysql://ms.itversity.com:3306/retail_db \
+  --username retail_user \
+  --password itversity \
+  --table order_items \
+  --warehouse-dir /user/training/sqoop_import/retail_db \
+  --delete-target-dir \
+  --split-by order_item_order_id
+  
+  
+  sqoop import \
+  --connect jdbc:mysql://ms.itversity.com:3306/retail_db \
+  --username retail_user \
+  --password itversity \
+  --query "SELECT order_date, count(1) order_count FROM orders \
+           WHERE \$CONDITIONS \
+           GROUP BY order_date" \
+  --target-dir /user/training/sqoop_import/retail_db/order_count_by_date \
+  --split-by order_date \
+  --delete-target-dir
+  
+  sqoop import \
+  --connect jdbc:mysql://ms.itversity.com:3306/hr_db \
+  --username hr_user \
+  --password itversity \
+  --table employees \
+  --warehouse-dir /user/training/sqoop_import/hr_db \
+  --delete-target-dir \
+  --null-non-string "-1"
+  --driver com.mysql.jdbc.Driver
+  
+  
+  ###establishing connection from mysql to hive-database
+   sqoop import \
+  --connect "jdbc:mysql://quickstart.cloudera:3306/retail_db" \
+  --username=retail_dba \
+  --password=cloudera \
+  --table departments \
+  --hive-database krishna 
+  
+  
+  -- Getting delta (--where)
+  --connect "jdbc:mysql://quickstart.cloudera:3306/sqooppractice" \
+  --username=retail_dba \
+  --password=cloudera \
+  --table students \
+  --hive-database sqooppractice \
+  --outdir java_files
+  
+  -- Incremental load
+sqoop import \
+  --connect "jdbc:mysql://quickstart.cloudera:3306/sqooppractice" \
+  --username=sqooppractice \
+  --password=cloudera \
+  --table students \
+  --target-dir /user/hive/warehouse/sqooppractice/students \
+  --append \
+  --fields-terminated-by '|' \
+  --lines-terminated-by '\n' \
+  --check-column "stdid" \
+  --incremental append \
+  --last-value 7 \
+  --outdir java_files 
+  
+sqoop import \
+--connect jdbc:mysql://ms.itversity.com:3306/retail_db \
+--username retail_user \
+--password itversity \
+--table order_items \
+--warehouse-dir /user/training/sqoop_import/retail_db \ 
+--delete-target-dir \
+--autoreset-to-one-mapper \
+--num-mappers 8
+  
+
+
+
+  
+  
+
+  
