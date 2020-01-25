@@ -175,6 +175,17 @@ sqoop import \
 --delete-target-dir \
 --autoreset-to-one-mapper \
 --num-mappers 8
+
+sqoop import \
+--connect jdbc:mysql://ms.itversity.com:3306/retail_db \
+--username retail_user \
+--password itversity \
+--table order_items \
+--warehouse-dir /user/training/sqoop_import/retail_db \ 
+--delete-target-dir \
+--autoreset-to-one-mapper \
+--num-mappers 9
+  
   
 
 
